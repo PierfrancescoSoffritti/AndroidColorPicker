@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ColorPickerDialogPreference">
+        <attr name="columnNumber" format="integer"/>
+        <attr name="colors" format="reference"/>
+    </declare-styleable>
+</resources>

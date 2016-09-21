@@ -1,0 +1,12 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.pierfrancescosoffritti.androidcolorpicker.ColorPickerDialogPreference
+        android:key="color"
+        android:title="color picker"
+        android:summary="summary"
+        android:defaultValue="@color/colorPrimary"
+        app:colors="@array/colors"
+        app:columnNumber="2" />
+
+</PreferenceScreen>
