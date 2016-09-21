@@ -18,6 +18,10 @@ import android.widget.ProgressBar;
 
 public class ColorPickerDialogPreference extends DialogPreference implements ColorPickerSwatch.OnColorSelectedListener {
 
+    public interface OnNewColorSelectedListener {
+        void newColorSelected(ColorPickerDialogPreference dialog, @ColorInt int color);
+    }
+
     private int[] colors = null;
     @ColorInt private int selectedColor;
     @ColorInt private int defaultColor;
@@ -26,7 +30,7 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
     private ColorPickerPalette colorPickerPalette;
     private ProgressBar progressBar;
 
-    private ColorPickerSwatch.OnColorSelectedListener listener;
+    private OnNewColorSelectedListener listener;
     private ImageView colorPreview;
 
     public ColorPickerDialogPreference(Context context, AttributeSet attrs) {
@@ -98,8 +102,8 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
             persistInt(selectedColor);
             setColorPreview(selectedColor);
 
-            if (listener != null)
-                listener.onColorSelected(selectedColor);
+            if(listener != null)
+                listener.newColorSelected(this, selectedColor);
 
         } else
             selectedColor = getPersistedInt(defaultColor);
@@ -218,11 +222,11 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
         return selectedColor;
     }
 
-    public ColorPickerSwatch.OnColorSelectedListener getListener() {
+    public OnNewColorSelectedListener getListener() {
         return listener;
     }
 
-    public void setListener(ColorPickerSwatch.OnColorSelectedListener listener) {
+    public void setListener(OnNewColorSelectedListener listener) {
         this.listener = listener;
     }
 
