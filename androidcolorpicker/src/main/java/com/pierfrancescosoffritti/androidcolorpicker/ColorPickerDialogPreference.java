@@ -97,6 +97,10 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
         if(positiveResult) {
             persistInt(selectedColor);
             setColorPreview(selectedColor);
+
+            if (listener != null)
+                listener.onColorSelected(selectedColor);
+
         } else
             selectedColor = getPersistedInt(defaultColor);
     }
@@ -122,9 +126,6 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
 
     @Override
     public void onColorSelected(int color) {
-        if (listener != null)
-            listener.onColorSelected(color);
-
         if (color != selectedColor) {
             selectedColor = color;
             // Redraw palette to show checkmark on newly selected color before dismissing.
