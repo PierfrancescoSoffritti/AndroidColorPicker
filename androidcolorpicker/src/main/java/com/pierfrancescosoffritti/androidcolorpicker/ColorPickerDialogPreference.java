@@ -207,6 +207,7 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
         if (selectedColor != color) {
             selectedColor = color;
             refreshPalette();
+            setColorPreview(selectedColor);
         }
     }
 
