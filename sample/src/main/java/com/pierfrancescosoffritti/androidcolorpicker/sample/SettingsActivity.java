@@ -3,6 +3,7 @@ package com.pierfrancescosoffritti.androidcolorpicker.sample;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -11,7 +12,10 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.MenuItem;
+
+import com.pierfrancescosoffritti.androidcolorpicker.ColorPickerDialogPreference;
 
 import java.util.List;
 
@@ -106,6 +110,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
+
+            ColorPickerDialogPreference picker = (ColorPickerDialogPreference) findPreference(getString(R.string.colorPickerKey));
+            picker.setOnNegativeButtonListener(new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Log.d(getClass().getSimpleName(), "clicked");
+                }
+            });
         }
 
         @Override

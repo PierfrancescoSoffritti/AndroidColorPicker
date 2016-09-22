@@ -1,12 +1,14 @@
 package com.pierfrancescosoffritti.androidcolorpicker;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.DialogPreference;
 import android.support.annotation.ColorInt;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -32,6 +34,8 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
 
     private OnNewColorSelectedListener listener;
     private ImageView colorPreview;
+
+    @Nullable private DialogInterface.OnClickListener onNegativeButtonListener;
 
     public ColorPickerDialogPreference(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -89,6 +93,8 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
         progressBar = (ProgressBar) view.findViewById(android.R.id.progress);
         colorPickerPalette = (ColorPickerPalette) view.findViewById(R.id.color_picker);
         colorPickerPalette.init(ColorPickerDialog.SIZE_SMALL, columns, this);
+
+
 
         if (colors != null)
             showPaletteView();
@@ -228,6 +234,23 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
 
     public void setListener(OnNewColorSelectedListener listener) {
         this.listener = listener;
+    }
+
+    @Nullable
+    public DialogInterface.OnClickListener getOnNegativeButtonListener() {
+        return onNegativeButtonListener;
+    }
+
+    public void setOnNegativeButtonListener(@Nullable DialogInterface.OnClickListener onNegativeButtonListener) {
+        this.onNegativeButtonListener = onNegativeButtonListener;
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which){
+        if(which == DialogInterface.BUTTON_NEGATIVE) {
+            if(onNegativeButtonListener != null)
+                onNegativeButtonListener.onClick(dialog, which);
+        }
     }
 
     private static class SavedState extends BaseSavedState {
