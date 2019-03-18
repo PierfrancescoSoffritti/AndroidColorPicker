@@ -29,9 +29,6 @@ public class ColorPickerDialogPreference extends Preference implements ColorPick
     @ColorInt private int defaultColor;
     private int columnsCount;
 
-    private ColorPickerPalette colorPickerPalette;
-    private ProgressBar progressBar;
-
     private OnNewColorSelectedListener listener;
     private ImageView colorPreview;
 
@@ -43,10 +40,6 @@ public class ColorPickerDialogPreference extends Preference implements ColorPick
         super(context, attrs, defStyleAttr);
 
         setAttrs(attrs);
-
-//        setDialogTitle(getContext().getString(R.string.color_picker_default_title));
-//        setPositiveButtonText(context.getString(android.R.string.ok));
-//        setNegativeButtonText(context.getString(android.R.string.cancel));
 
         setLayoutResource(R.layout.colorpicker_dialog_preference_preview);
     }
@@ -93,6 +86,7 @@ public class ColorPickerDialogPreference extends Preference implements ColorPick
         super.onClick();
         ColorPickerDialog dialog = ColorPickerDialog
                 .newInstance(R.string.color_picker_default_title, colors, selectedColor, columnsCount, ColorPickerDialog.SIZE_SMALL);
+        dialog.setCancelable(false);
         dialog.show(fragmentManager, "cpd_colorPickerDialogPreference");
 
         dialog.setOnColorSelectedListener(this);
@@ -111,29 +105,12 @@ public class ColorPickerDialogPreference extends Preference implements ColorPick
             public void onNegativeButtonClicked() {
                 selectedColor = getPersistedInt(defaultColor);
             }
-
-            @Override
-            public void onDismiss() {
-                selectedColor = getPersistedInt(defaultColor);
-            }
         };
     }
 
     @Override
     public void onColorSelected(int color) {
         selectedColor = color;
-    }
-
-    protected void onDialogClosed(boolean positiveResult) {
-        if(positiveResult) {
-            persistInt(selectedColor);
-            setColorPreview(selectedColor);
-
-            if(listener != null)
-                listener.newColorSelected(this, selectedColor);
-
-        } else
-            selectedColor = getPersistedInt(defaultColor);
     }
 
     @Override
@@ -186,50 +163,25 @@ public class ColorPickerDialogPreference extends Preference implements ColorPick
 
         // Set this Preference's widget to reflect the restored state
         selectedColor = myState.value;
-        colorPickerPalette.drawPalette(colors, myState.value);
-    }
-
-    private void showPaletteView() {
-        if (progressBar != null && colorPickerPalette != null) {
-            progressBar.setVisibility(View.GONE);
-            refreshPalette();
-            colorPickerPalette.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void showProgressBarView() {
-        if (progressBar != null && colorPickerPalette != null) {
-            progressBar.setVisibility(View.VISIBLE);
-            colorPickerPalette.setVisibility(View.GONE);
-        }
     }
 
     public void setColors(int[] colors, int selectedColor) {
         if (this.colors != colors || this.selectedColor != selectedColor) {
             this.colors = colors;
             this.selectedColor = selectedColor;
-            refreshPalette();
         }
     }
 
     public void setColors(int[] colors) {
         if (this.colors != colors) {
             this.colors = colors;
-            refreshPalette();
         }
     }
 
     public void setSelectedColor(int color) {
         if (selectedColor != color) {
             selectedColor = color;
-            refreshPalette();
             setColorPreview(selectedColor);
-        }
-    }
-
-    private void refreshPalette() {
-        if (colorPickerPalette != null && colors != null) {
-            colorPickerPalette.drawPalette(colors, selectedColor, null);
         }
     }
 

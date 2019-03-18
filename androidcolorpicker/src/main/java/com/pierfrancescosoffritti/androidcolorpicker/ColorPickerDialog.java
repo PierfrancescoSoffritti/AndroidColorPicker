@@ -41,7 +41,6 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
     interface DialogObserver {
         void onPositiveButtonClicked();
         void onNegativeButtonClicked();
-        void onDismiss();
     }
 
     public static final int SIZE_LARGE = 1;
@@ -144,12 +143,6 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialogObserver.onNegativeButtonClicked();
-                    }
-                })
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        dialogObserver.onDismiss();
                     }
                 })
                 .create();
