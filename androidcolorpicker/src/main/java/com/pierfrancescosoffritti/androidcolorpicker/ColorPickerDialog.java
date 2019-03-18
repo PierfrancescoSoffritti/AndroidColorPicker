@@ -17,12 +17,14 @@
 package com.pierfrancescosoffritti.androidcolorpicker;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.IntDef;
-import android.support.annotation.StringRes;
+import androidx.annotation.IntDef;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -35,6 +37,12 @@ import java.lang.annotation.RetentionPolicy;
  * select a specific color swatch, which invokes a listener.
  */
 public class ColorPickerDialog extends DialogFragment implements ColorPickerSwatch.OnColorSelectedListener {
+
+    interface DialogObserver {
+        void onPositiveButtonClicked();
+        void onNegativeButtonClicked();
+        void onDismiss();
+    }
 
     public static final int SIZE_LARGE = 1;
     public static final int SIZE_SMALL = 2;
@@ -63,6 +71,8 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
     private ProgressBar mProgress;
 
     protected ColorPickerSwatch.OnColorSelectedListener mListener;
+
+    protected DialogObserver dialogObserver;
 
     public ColorPickerDialog() {
         // Empty constructor required for dialog fragments.
@@ -113,8 +123,8 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
         final Activity activity = getActivity();
 
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.color_picker_dialog, null);
-        mProgress = (ProgressBar) view.findViewById(android.R.id.progress);
-        mPalette = (ColorPickerPalette) view.findViewById(R.id.color_picker);
+        mProgress = view.findViewById(android.R.id.progress);
+        mPalette = view.findViewById(R.id.color_picker);
         mPalette.init(mSize, mColumns, this);
 
         if (mColors != null) {
@@ -122,11 +132,34 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
         }
 
         mAlertDialog = new AlertDialog.Builder(activity)
-            .setTitle(mTitleResId)
-            .setView(view)
-            .create();
+                .setTitle(mTitleResId)
+                .setView(view)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialogObserver.onPositiveButtonClicked();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialogObserver.onNegativeButtonClicked();
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        dialogObserver.onDismiss();
+                    }
+                })
+                .create();
 
         return mAlertDialog;
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
     }
 
     @Override
@@ -145,8 +178,6 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
             // Redraw palette to show checkmark on newly selected color before dismissing.
             mPalette.drawPalette(mColors, mSelectedColor);
         }
-
-        dismiss();
     }
 
     public void showPaletteView() {

@@ -18,8 +18,8 @@ package com.pierfrancescosoffritti.androidcolorpicker;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.IntRange;
-import android.support.annotation.Nullable;
+import androidx.annotation.IntRange;
+import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;

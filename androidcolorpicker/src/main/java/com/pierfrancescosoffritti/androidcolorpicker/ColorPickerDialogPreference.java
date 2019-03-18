@@ -1,22 +1,24 @@
 package com.pierfrancescosoffritti.androidcolorpicker;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.preference.DialogPreference;
-import android.support.annotation.ColorInt;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-public class ColorPickerDialogPreference extends DialogPreference implements ColorPickerSwatch.OnColorSelectedListener {
+import androidx.annotation.ColorInt;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
+
+public class ColorPickerDialogPreference extends Preference implements ColorPickerSwatch.OnColorSelectedListener {
 
     public interface OnNewColorSelectedListener {
         void newColorSelected(ColorPickerDialogPreference dialog, @ColorInt int color);
@@ -25,7 +27,7 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
     private int[] colors = null;
     @ColorInt private int selectedColor;
     @ColorInt private int defaultColor;
-    private int columns;
+    private int columnsCount;
 
     private ColorPickerPalette colorPickerPalette;
     private ProgressBar progressBar;
@@ -42,9 +44,9 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
 
         setAttrs(attrs);
 
-        setDialogTitle(getContext().getString(R.string.color_picker_default_title));
-        setPositiveButtonText(context.getString(android.R.string.ok));
-        setNegativeButtonText(context.getString(android.R.string.cancel));
+//        setDialogTitle(getContext().getString(R.string.color_picker_default_title));
+//        setPositiveButtonText(context.getString(android.R.string.ok));
+//        setNegativeButtonText(context.getString(android.R.string.cancel));
 
         setLayoutResource(R.layout.colorpicker_dialog_preference_preview);
     }
@@ -57,10 +59,10 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
                 throw new IllegalStateException("You must set the colors attribute.");
             colors = getContext().getResources().getIntArray(colorsResId);
 
-            columns = ta.getInt(R.styleable.ColorPickerDialogPreference_columnNumber, -1);
-            if(columns <= 0) {
+            columnsCount = ta.getInt(R.styleable.ColorPickerDialogPreference_columnNumber, -1);
+            if(columnsCount <= 0) {
                 Log.i(getClass().getSimpleName(), "Columns number not set or <= 0. Using default: 6");
-                columns = 6;
+                columnsCount = 6;
             }
         } finally {
             ta.recycle();
@@ -68,13 +70,11 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
     }
 
     @Override
-    protected View onCreateView(ViewGroup parent) {
-        View view = super.onCreateView(parent);
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
 
-        colorPreview = (ImageView) view.findViewById(R.id.color_preview);
+        colorPreview = holder.itemView.findViewById(R.id.color_preview);
         setColorPreview(selectedColor);
-
-        return view;
     }
 
     private void setColorPreview(int color) {
@@ -82,23 +82,48 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
         colorPreview.setImageDrawable(new ColorStateDrawable(colorDrawable, color));
     }
 
-    @Override
-    protected View onCreateDialogView() {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.color_picker_dialog, null);
+    private FragmentManager fragmentManager = null;
 
-        progressBar = (ProgressBar) view.findViewById(android.R.id.progress);
-        colorPickerPalette = (ColorPickerPalette) view.findViewById(R.id.color_picker);
-        colorPickerPalette.init(ColorPickerDialog.SIZE_SMALL, columns, this);
-
-
-
-        if (colors != null)
-            showPaletteView();
-
-        return view;
+    public void setSupportFragmentManager(FragmentManager fragmentManager) {
+        this.fragmentManager = fragmentManager;
     }
 
     @Override
+    protected void onClick() {
+        super.onClick();
+        ColorPickerDialog dialog = ColorPickerDialog
+                .newInstance(R.string.color_picker_default_title, colors, selectedColor, columnsCount, ColorPickerDialog.SIZE_SMALL);
+        dialog.show(fragmentManager, "cpd_colorPickerDialogPreference");
+
+        dialog.setOnColorSelectedListener(this);
+
+        dialog.dialogObserver = new ColorPickerDialog.DialogObserver() {
+            @Override
+            public void onPositiveButtonClicked() {
+                persistInt(selectedColor);
+                setColorPreview(selectedColor);
+
+                if(listener != null)
+                    listener.newColorSelected(ColorPickerDialogPreference.this, selectedColor);
+            }
+
+            @Override
+            public void onNegativeButtonClicked() {
+                selectedColor = getPersistedInt(defaultColor);
+            }
+
+            @Override
+            public void onDismiss() {
+                selectedColor = getPersistedInt(defaultColor);
+            }
+        };
+    }
+
+    @Override
+    public void onColorSelected(int color) {
+        selectedColor = color;
+    }
+
     protected void onDialogClosed(boolean positiveResult) {
         if(positiveResult) {
             persistInt(selectedColor);
@@ -128,15 +153,6 @@ public class ColorPickerDialogPreference extends DialogPreference implements Col
             throw new IllegalStateException("You must set a default color.");
 
         return defaultColor;
-    }
-
-    @Override
-    public void onColorSelected(int color) {
-        if (color != selectedColor) {
-            selectedColor = color;
-            // Redraw palette to show checkmark on newly selected color before dismissing.
-            colorPickerPalette.drawPalette(colors, selectedColor);
-        }
     }
 
     @Override

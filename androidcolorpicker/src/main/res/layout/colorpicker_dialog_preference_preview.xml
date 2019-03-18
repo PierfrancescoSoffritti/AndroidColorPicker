@@ -19,7 +19,7 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
 
-        android:ellipsize="marquee"
+        android:singleLine="true"
         android:fadingEdge="horizontal"
 
         android:layout_alignParentTop="true"
