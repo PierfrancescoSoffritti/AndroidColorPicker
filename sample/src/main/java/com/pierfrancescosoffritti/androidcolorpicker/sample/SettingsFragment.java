@@ -10,6 +10,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
 
+    ColorPickerDialogPreference colorPickerDialog;
 
     public SettingsFragment() {
     }
@@ -22,7 +23,13 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.preferences);
 
-        ColorPickerDialogPreference colorPicker = (ColorPickerDialogPreference) findPreference(getString(R.string.color_picker_key));
-        colorPicker.setSupportFragmentManager(getActivity().getSupportFragmentManager());
+        colorPickerDialog = (ColorPickerDialogPreference) findPreference(getString(R.string.color_picker_key));
+        colorPickerDialog.setSupportFragmentManager(getActivity().getSupportFragmentManager());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        colorPickerDialog.dismiss();
     }
 }

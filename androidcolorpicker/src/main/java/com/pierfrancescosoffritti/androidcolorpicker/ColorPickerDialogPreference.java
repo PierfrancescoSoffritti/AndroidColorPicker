@@ -81,10 +81,13 @@ public class ColorPickerDialogPreference extends Preference implements ColorPick
         this.fragmentManager = fragmentManager;
     }
 
+    private ColorPickerDialog dialog = null;
+
     @Override
     protected void onClick() {
         super.onClick();
-        ColorPickerDialog dialog = ColorPickerDialog
+
+        dialog = ColorPickerDialog
                 .newInstance(R.string.color_picker_default_title, colors, selectedColor, columnsCount, ColorPickerDialog.SIZE_SMALL);
         dialog.setCancelable(false);
         dialog.show(fragmentManager, "cpd_colorPickerDialogPreference");
@@ -106,6 +109,11 @@ public class ColorPickerDialogPreference extends Preference implements ColorPick
                 selectedColor = getPersistedInt(defaultColor);
             }
         };
+    }
+
+    public void dismiss() {
+        if(dialog != null)
+            dialog.dismiss();
     }
 
     @Override

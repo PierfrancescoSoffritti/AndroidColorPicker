@@ -151,11 +151,6 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerSwat
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-    }
-
-    @Override
     public void onColorSelected(int color) {
         if (mListener != null) {
             mListener.onColorSelected(color);
